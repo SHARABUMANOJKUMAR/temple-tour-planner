@@ -1,0 +1,67 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #ffecd2, #fcb69f);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+h1, h2 {
+    color: #b03bff;
+    text-align: center;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #b03bff;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #b03bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #6a0dad;
+}
+
+.recommendation {
+    background: #fff7e6;
+    border-left: 6px solid #ff9800;
+    padding: 20px;
+    font-size: 17px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+a.map-link {
+    display: inline-block;
+    margin-top: 10px;
+    background: #00bcd4;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+a.map-link:hover {
+    background: #007c91;
+}

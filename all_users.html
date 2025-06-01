@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>📋 All Temple Tour Plans</title>
+    <style>
+        /* ... existing styles ... */
+    </style>
+</head>
+<body>
+
+    <h2>📋 All Temple Tour Plans</h2>
+
+    <a href="/" id="homeLink">⬅️ Back to Home</a>
+
+    <input type="text" id="searchInput" placeholder="🔍 Search..." />
+
+    <!-- Added: Preference Filter Dropdown -->
+    <select id="preferenceFilter" style="margin-bottom: 20px; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+        <option value="">All Preferences</option>
+        <!-- Add your preferences dynamically or hardcode -->
+        <option value="Temple A">Temple A</option>
+        <option value="Temple B">Temple B</option>
+        <option value="Temple C">Temple C</option>
+    </select>
+
+    <button id="exportBtn">📥 Export CSV</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">👤 Name</th>
+                <th scope="col">🎂 Age</th>
+                <th scope="col">📍 Location</th>
+                <th scope="col">🙏 Preference</th>
+                <th scope="col">🕒 Created At</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            {% for user in users %}
+            <tr>
+                <td data-label="ID">{{ user[0] }}</td>
+                <td data-label="Name">{{ user[1] }}</td>
+                <td data-label="Age">{{ user[2] }}</td>
+                <td data-label="Location">{{ user[3] }}</td>
+                <td data-label="Preference">{{ user[4] }}</td>
+                <td data-label="Created At">{{ user[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="pagination"></div>
+
+<script>
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    let allRows = [];
+    let filteredRows = [];
+
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const paginationDiv = document.getElementById('pagination');
+    const exportBtn = document.getElementById('exportBtn');
+    const preferenceFilter = document.getElementById('preferenceFilter');
+
+    function initRows() {
+        allRows = Array.from(tableBody.querySelectorAll('tr'));
+        filteredRows = allRows;
+    }
+
+    function renderTablePage(page) {
+        tableBody.innerHTML = '';
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageRows = filteredRows.slice(start, end);
+        pageRows.forEach(row => tableBody.appendChild(row));
+        renderPagination();
+        addRowClickListeners();  // Re-add click listeners after rendering page
+    }
+
+    function renderPagination() {
+        paginationDiv.innerHTML = '';
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (totalPages <= 1) return;
+
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '⬅️ Prev';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.classList.toggle('disabled', currentPage === 1);
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTablePage(currentPage);
+            }
+        });
+        paginationDiv.appendChild(prevBtn);
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.textContent = i;
+            if (i === currentPage) pageBtn.classList.add('active');
+            pageBtn.addEventListener('click', () => {
+                currentPage = i;
+                renderTablePage(currentPage);
+            });
+            paginationDiv.appendChild(pageBtn);
+        }
+
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Next ➡️';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.classList.toggle('disabled', currentPage === totalPages);
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTablePage(currentPage);
+            }
+        });
+        paginationDiv.appendChild(nextBtn);
+    }
+
+    searchInput.addEventListener('input', () => {
+        filterRows();
+    });
+
+    preferenceFilter.addEventListener('change', () => {
+        filterRows();
+    });
+
+    function filterRows() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedPreference = preferenceFilter.value.toLowerCase();
+
+        filteredRows = allRows.filter(row => {
+            const rowText = row.innerText.toLowerCase();
+            const prefText = row.querySelector('td[data-label="Preference"]').innerText.toLowerCase();
+            return rowText.includes(searchTerm) && (selectedPreference === '' || prefText === selectedPreference);
+        });
+        currentPage = 1;
+        renderTablePage(currentPage);
+    }
+
+    document.querySelectorAll('th').forEach(header => {
+        header.addEventListener('click', () => {
+            const index = Array.from(header.parentNode.children).indexOf(header);
+            const isAsc = !header.classList.contains('asc');
+
+            filteredRows.sort((a, b) => {
+                const aText = a.children[index].innerText.trim().toLowerCase();
+                const bText = b.children[index].innerText.trim().toLowerCase();
+
+                if (!isNaN(Date.parse(aText)) && !isNaN(Date.parse(bText))) {
+                    return isAsc ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
+                } else if (!isNaN(aText) && !isNaN(bText)) {
+                    return isAsc ? aText - bText : bText - aText;
+                } else {
+                    return isAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+                }
+            });
+
+            document.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+            header.classList.toggle('asc', isAsc);
+            header.classList.toggle('desc', !isAsc);
+
+            currentPage = 1;
+            renderTablePage(currentPage);
+        });
+    });
+
+    exportBtn.addEventListener('click', () => {
+        let csv = [];
+        const headers = Array.from(document.querySelectorAll('thead th')).map(th => th.innerText.trim());
+        csv.push(headers.join(','));
+
+        filteredRows.forEach(row => {
+            const cols = Array.from(row.children).map(td => `"${td.innerText.trim().replace(/"/g, '""')}"`);
+            csv.push(cols.join(','));
+        });
+
+        const csvString = csv.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'temple_tour_plans.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // Add click listener to each row - open user details page
+    function addRowClickListeners() {
+        allRows.forEach(row => {
+            row.style.cursor = 'pointer';
+            row.onclick = () => {
+                const userId = row.querySelector('td[data-label="ID"]').innerText;
+                window.location.href = `/user/${userId}`;
+            };
+        });
+    }
+
+    window.onload = () => {
+        initRows();
+        renderTablePage(currentPage);
+        addRowClickListeners();
+    };
+    <td data-label="ID">
+  <a href="/user/{{ user[0] }}">{{ user[0] }}</a>
+</td>
+</script>
+</body>
+</html>

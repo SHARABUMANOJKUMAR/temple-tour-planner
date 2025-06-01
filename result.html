@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Temple Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f2f2f2, #e6e9f0);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      font-size: 18px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+
+    .container {
+      background-color: #fff;
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      max-width: 850px;
+      margin: auto;
+      animation: fadeIn 0.7s ease-in-out;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dark-mode .container {
+      background-color: #1e1e1e;
+      color: #f1f1f1;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 30px;
+      animation: fadeUp 0.6s ease-in;
+    }
+
+    .recommendation {
+      white-space: pre-line;
+      font-size: 18px;
+      line-height: 1.6;
+      margin-top: 20px;
+      text-align: justify;
+      animation: fadeUp 1s ease-in-out;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      animation: fadeUp 1.2s ease;
+    }
+
+    .map-link {
+      display: inline-block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .dark-mode .map-link {
+      color: #80bfff;
+    }
+
+    .map-link:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 6px 6px 0 0;
+      border: none;
+      border-radius: 8px;
+      background-color: #5c67f2;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #4048d0;
+      transform: scale(1.05);
+    }
+
+    .button-group {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 1.3s ease;
+    }
+
+    .toggle-switch {
+      float: right;
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      color: #007BFF;
+    }
+
+    .dark-mode .toggle-switch {
+      color: #80bfff;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      button {
+        width: 100%;
+        margin: 8px 0;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .toggle-switch {
+        float: none;
+        display: block;
+        text-align: right;
+        margin-bottom: 10px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <div class="toggle-switch" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</div>
+
+    <h2 aria-label="Personalized Temple Plan">🛕 Your Personalized Temple Tour Plan</h2>
+
+    <div class="recommendation" id="translation-result">{{ recommendation }}</div>
+
+    {% if image_url %}
+      <img src="{{ image_url }}" alt="Temple Image" />
+    {% endif %}
+
+    <a class="map-link" href="https://www.google.com/maps/search/{{ recommendation | urlencode }}" target="_blank" aria-label="View on Google Maps">
+      📍 View on Google Maps
+    </a>
+
+    <div class="button-group">
+      <form action="/" method="get" style="display:inline;">
+        <button type="submit" aria-label="Back to Home">⬅️ Back to Home</button>
+      </form>
+
+      <button onclick="handleSOS()" aria-label="SOS Emergency Button">🚨 SOS Emergency</button>
+      <button onclick="translate('te')" aria-label="Translate to Telugu">🌐 Telugu</button>
+      <button onclick="translate('hi')" aria-label="Translate to Hindi">🌐 Hindi</button>
+      <button onclick="showOriginal()" aria-label="Show in English">🔙 English</button>
+    </div>
+  </div>
+
+  <script>
+    const originalText = {{ recommendation | tojson | safe }};
+
+    function translate(lang) {
+      const resultDiv = document.getElementById('translation-result');
+      resultDiv.innerText = "⏳ Translating...";
+      fetch('/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: originalText, lang: lang })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.translation) {
+          resultDiv.innerText = data.translation;
+          speakText(data.translation);
+        } else {
+          resultDiv.innerText = "❌ Translation failed.";
+        }
+      })
+      .catch(error => {
+        console.error("Translation error:", error);
+        resultDiv.innerText = "❌ Error translating.";
+      });
+    }
+
+    function showOriginal() {
+      const resultDiv = document.getElementById('translation-result');
+      resultDiv.innerText = originalText;
+      speakText(originalText);
+    }
+
+    function handleSOS() {
+      const confirmSOS = confirm("⚠️ Do you want to contact emergency services?");
+      if (confirmSOS) {
+        alert("🚨 Emergency services contacted! Stay calm.");
+        // Future enhancement: send alert to backend or emergency contact API
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+    }
+
+    function speakText(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = "en-IN";
+      msg.rate = 0.9;
+      msg.pitch = 1.1;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(msg);
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+      }
+      speakText(originalText);
+    };
+  </script>
+</body>
+</html>

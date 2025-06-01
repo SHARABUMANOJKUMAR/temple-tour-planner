@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Temple Tour Planner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .actions form {
+            margin-bottom: 15px;
+        }
+        .actions input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .actions button {
+            width: auto;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛕 Temple Tour Planner for Seniors</h1>
+        <img src="https://thumbs.dreamstime.com/b/big-indian-temple-generate-ai-big-indian-temple-asian-religion-architecture-generate-ai-ai-generated-289904279.jpg?w=1200&h=1200&s=1" alt="Brihadeeshwara Temple" style="width:500px; height:auto;">
+
+        <p>Plan a safe and spiritual journey for seniors with our smart platform.</p>
+        
+        <!-- Main Tour Plan Form -->
+        <form action="/recommend" method="POST">
+            <label for="name">👤 Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="age">🎂 Age:</label>
+            <input type="number" id="age" name="age" min="1" required>
+
+            <label for="location">📍 Your Location:</label>
+            <input type="text" id="location" name="location" required>
+
+            <label for="preference">🙏 Temple Preference:</label>
+            <select id="preference" name="preference" required>
+                <option value="">--Select--</option>
+                <option value="spiritual">Spiritual</option>
+                <option value="historical">Historical</option>
+                <option value="peaceful">Peaceful</option>
+                <option value="adventure">Adventure</option>
+                <option value="coastal">Coastal</option>
+                <option value="south indian">South Indian</option>
+            </select>
+
+            <button type="submit">🔮 Generate Tour Plan</button>
+        </form>
+
+        <!-- Search and View All Plans -->
+        <div class="actions">
+            <form method="GET" action="/">
+                <input type="text" name="q" placeholder="Search by Name, Location, or Preference" />
+                <button type="submit">🔍 Search</button>
+            </form>
+
+            <form method="GET" action="/all_users">
+                <button type="submit" style="background: #28a745;">📋 View All Plans</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
